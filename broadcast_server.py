@@ -29,6 +29,15 @@ def client_handler(connectionSocket, connections, username):
                 else:
                     connectionSocket.send("User not found or offline.".encode())
             # =========================================
+            if text.startswith("AUDIO_START"):
+                for conn in list(connections):
+                    if conn !=connectionSocket:
+                        conn.send("AUDIO_START".encode())
+                        while True:
+                            data = connectionSocket.recv(1024)
+                            if not data:
+                                break
+                            conn.send(data)
             else:
                 # Broadcast to all other clients
                 for conn in list(connections):
@@ -52,7 +61,7 @@ def client_handler(connectionSocket, connections, username):
           pass
         connectionSocket.close()
         print(f"[SERVER] {username} disconnected.")
-    
+
 
 serverPort = 12000
 serverSocket = socket(AF_INET, SOCK_STREAM)
