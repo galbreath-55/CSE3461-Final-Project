@@ -1,6 +1,8 @@
 from socket import *
 import threading
 
+AUDIO_START = "AUDIO_START"
+AUDIO_END = "AUDIO_END"
 user_map = {}  # username → socket
 
 def client_handler(connectionSocket, connections, username):
@@ -29,15 +31,47 @@ def client_handler(connectionSocket, connections, username):
                 else:
                     connectionSocket.send("User not found or offline.".encode())
             # =========================================
-            if text.startswith("AUDIO_START"):
-                for conn in list(connections):
-                    if conn !=connectionSocket:
-                        conn.send("AUDIO_START".encode())
-                        while True:
-                            data = connectionSocket.recv(1024)
-                            if not data:
-                                break
+            elif text.startswith(AUDIO_START):
+                # Find all receivers except for itself
+                targets = [c for c in list(connections) if c != connectionSocket]
+                # Notify all receivers to receive audio
+                for conn in targets:
+                    try:
+                        conn.send(AUDIO_START.encode())
+                    except Exception:
+                        pass
+                
+                # Start continuously reading audio data from the sender
+                while True:
+                    data = connectionSocket.recv(1024)
+                    if not data:
+                        break
+                    
+                    is_end = False
+                    try:
+                        maybe_text = data.decode().strip()
+                        if maybe_text == AUDIO_END:
+                            is_end = True
+                    except UnicodeDecodeError:
+                        pass
+                    
+                    if is_end:
+                        # When the audio is end, tell all receivers that it is end
+                        for conn in targets:
+                            try:
+                                conn.send(AUDIO_END.encode())
+                            except Exception:
+                                pass
+                        break
+                    
+                    # Otherwise it is normal audit data. Send to all receivers
+                    for conn in targets:
+                        try:
                             conn.send(data)
+                        except Exception:
+                            pass
+                            
+
             else:
                 # Broadcast to all other clients
                 for conn in list(connections):
