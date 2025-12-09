@@ -19,6 +19,7 @@ Install the following dependencies:
 
 2. Join as clients:
 
+    - Ensure that the "server_name" variable is correctly intialized to the IPv4 address of the server.
     - Run python broadcast_client.py
     - If the run is successful, the terminal will prompt the user to enter a username to complete the handshake.
     - Clients can enter messages to broadcast.
