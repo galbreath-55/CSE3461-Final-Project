@@ -4,10 +4,14 @@ This project is a simple multi-user chat system. Clients are able to connect to 
 
 ## Requirements
 
-Install the following dependencies:
+Install the following dependencies (preferably in a virtual environment):
 
-- pip install pyaudio
-- pip install keyboard
+- pip3 install pyaudio
+On macOS, you may need to install PortAudio first:
+
+- brew install portaudio
+- pip3 install pyaudio
+
 
 ## Running the program
 
@@ -24,13 +28,14 @@ Install the following dependencies:
     - If the run is successful, the terminal will prompt the user to enter a username to complete the handshake.
     - Clients can enter messages to broadcast.
     - Prefix @user to privately message a user.
-    - Enter !audio will begin transmitting audio to all users. Press q to end transmission.
+    - Enter `!audio` to begin transmitting an audio clip to all users. The client records for about 5 seconds and then automatically ends the transmission.
     - Enter /quit or quit to end the connection.
 
 ## How audio transmission works
 
-- When the user enters !audio, the client sends "AUDIO_START" to the server.
-- The server forwards the same message to the receiving clients, and they begin receiving audio frames.
-- The client sends raw audio to the server, which then sends them to all connection clients.
-- Audio is sent and received in near real time.
-- Audio is setup as a one way stream, and does not allow for overlapping audio.
+- When the user enters `!audio`, the client sends the control message `"AUDIO_START"` to the server.
+- The server forwards `"AUDIO_START"` to all other connected clients. Upon receiving this, they switch into audio-receiving mode and start reading raw audio frames from the socket.
+- The sending client records a short audio clip (about 5 seconds) using PyAudio and streams the raw audio frames to the server.
+- The server rebroadcasts these audio frames to all other clients in (near) real time.
+- After finishing the recording, the sender transmits an `"AUDIO_END"` control message. The server forwards this to the receivers, which causes them to stop audio playback and return to normal text mode.
+- Audio is currently one-way: only one user speaks at a time, and overlapping audio is not supported.
