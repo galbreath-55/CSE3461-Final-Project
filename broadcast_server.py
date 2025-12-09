@@ -30,7 +30,7 @@ def client_handler(connectionSocket, connections, username):
                         connectionSocket.send("Failed to deliver private message.".encode())
                 else:
                     connectionSocket.send("User not found or offline.".encode())
-            # =========================================
+            # ====== Feature-3: audio messages =======
             elif text.startswith(AUDIO_START):
                 # Find all receivers except for itself
                 targets = [c for c in list(connections) if c != connectionSocket]
@@ -71,7 +71,6 @@ def client_handler(connectionSocket, connections, username):
                         except Exception:
                             pass
                             
-
             else:
                 # Broadcast to all other clients
                 for conn in list(connections):

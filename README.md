@@ -12,7 +12,6 @@ On macOS, you may need to install PortAudio first:
 - brew install portaudio
 - pip3 install pyaudio
 
-
 ## Running the program
 
 1. Start a server:
